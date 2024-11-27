@@ -21,7 +21,8 @@
       "extensions": [
         "ms-azuretools.vscode-azurefunctions",
         "dbaeumer.vscode-eslint",
-        "ms-azuretools.ms-entra"
+        "ms-azuretools.ms-entra",
+        "humao.rest-client"
       ]
     }
   }
