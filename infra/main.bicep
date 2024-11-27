@@ -15,8 +15,9 @@ param environmentName string
 })
 param location string
 
-param processorServiceName string = ''
-param processorUserAssignedIdentityName string = ''
+param SpaURL string
+param proxyServiceName string = ''
+param proxyUserAssignedIdentityName string = ''
 param applicationInsightsName string = ''
 param appServicePlanName string = ''
 param logAnalyticsName string = ''
@@ -37,22 +38,22 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 }
 
 // User assigned managed identity to be used by the Function App to reach storage and service bus
-module processorUserAssignedIdentity './core/identity/userAssignedIdentity.bicep' = {
-  name: 'processorUserAssignedIdentity'
+module proxyUserAssignedIdentity './core/identity/userAssignedIdentity.bicep' = {
+  name: 'proxyUserAssignedIdentity'
   scope: rg
   params: {
     location: location
     tags: tags
-    identityName: !empty(processorUserAssignedIdentityName) ? processorUserAssignedIdentityName : '${abbrs.managedIdentityUserAssignedIdentities}processor-${resourceToken}'
+    identityName: !empty(proxyUserAssignedIdentityName) ? proxyUserAssignedIdentityName : '${abbrs.managedIdentityUserAssignedIdentities}proxy-${resourceToken}'
   }
 }
 
 // The application backend
-module processor './app/processor.bicep' = {
-  name: 'processor'
+module proxy './app/proxy.bicep' = {
+  name: 'proxy'
   scope: rg
   params: {
-    name: !empty(processorServiceName) ? processorServiceName : '${abbrs.webSitesFunctions}processor-${resourceToken}'
+    name: !empty(proxyServiceName) ? proxyServiceName : '${abbrs.webSitesFunctions}proxy-${resourceToken}'
     location: location
     tags: tags
     applicationInsightsName: monitoring.outputs.applicationInsightsName
@@ -60,15 +61,18 @@ module processor './app/processor.bicep' = {
     runtimeName: 'node'
     runtimeVersion: '20'
     storageAccountName: storage.outputs.name
-    identityId: processorUserAssignedIdentity.outputs.identityId
-    identityClientId: processorUserAssignedIdentity.outputs.identityClientId
+    identityId: proxyUserAssignedIdentity.outputs.identityId
+    identityClientId: proxyUserAssignedIdentity.outputs.identityClientId
     appSettings: {
+      cors: {
+        allowedOrigins: [SpaURL]
+      }
     }
     virtualNetworkSubnetId: serviceVirtualNetwork.outputs.appSubnetID
   }
 }
 
-// Backing storage for Azure functions processor
+// Backing storage for Azure functions proxy
 module storage './core/storage/storage-account.bicep' = {
   name: 'storage'
   scope: rg
@@ -83,14 +87,14 @@ module storage './core/storage/storage-account.bicep' = {
 
 var storageRoleDefinitionId  = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b' //Storage Blob Data Owner role
 
-// Allow access from processor to storage account using a managed identity
+// Allow access from proxy to storage account using a managed identity
 module storageRoleAssignmentApi 'app/storage-Access.bicep' = {
-  name: 'storageRoleAssignmentPRocessor'
+  name: 'storageRoleAssignmentProxy'
   scope: rg
   params: {
     storageAccountName: storage.outputs.name
     roleDefinitionID: storageRoleDefinitionId
-    principalID: processorUserAssignedIdentity.outputs.identityPrincipalId
+    principalID: proxyUserAssignedIdentity.outputs.identityPrincipalId
   }
 }
 
@@ -146,14 +150,14 @@ module monitoring './core/monitor/monitoring.bicep' = {
 
 var monitoringRoleDefinitionId = '3913510d-42f4-4e42-8a64-420c390055eb' // Monitoring Metrics Publisher role ID
 
-// Allow access from processor to application insights using a managed identity
+// Allow access from proxy to application insights using a managed identity
 module appInsightsRoleAssignmentApi './core/monitor/appinsights-access.bicep' = {
-  name: 'appInsightsRoleAssignmentPRocessor'
+  name: 'appInsightsRoleAssignmentProxy'
   scope: rg
   params: {
     appInsightsName: monitoring.outputs.applicationInsightsName
     roleDefinitionID: monitoringRoleDefinitionId
-    principalID: processorUserAssignedIdentity.outputs.identityPrincipalId
+    principalID: proxyUserAssignedIdentity.outputs.identityPrincipalId
   }
 }
 
@@ -161,5 +165,5 @@ module appInsightsRoleAssignmentApi './core/monitor/appinsights-access.bicep' = 
 output APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
-output SERVICE_PROCESSOR_NAME string = processor.outputs.SERVICE_PROCESSOR_NAME
-output AZURE_FUNCTION_NAME string = processor.outputs.SERVICE_PROCESSOR_NAME
+output SERVICE_PROXY_NAME string = proxy.outputs.SERVICE_PROXY_NAME
+output AZURE_FUNCTION_NAME string = proxy.outputs.SERVICE_PROXY_NAME

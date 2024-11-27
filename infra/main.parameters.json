@@ -7,6 +7,12 @@
     },
     "location": {
       "value": "${AZURE_LOCATION}"
+    },
+    "SPAUrl": {
+      "value": "${SPA_URL}"
+    },
+    "tenantSubdomain ": {
+      "value": "${TENANT_SUBDOMAIN}"
     }
   }
 }

@@ -6,7 +6,7 @@ param appServicePlanId string
 param appSettings object = {}
 param runtimeName string 
 param runtimeVersion string 
-param serviceName string = 'processor'
+param serviceName string = 'proxy'
 param storageAccountName string
 param virtualNetworkSubnetId string = ''
 param instanceMemoryMB int = 2048
@@ -16,7 +16,7 @@ param identityClientId string = ''
 
 var applicationInsightsIdentity = 'ClientId=${identityClientId};Authorization=AAD'
 
-module processor '../core/host/functions-flexconsumption.bicep' = {
+module proxy '../core/host/functions-flexconsumption.bicep' = {
   name: '${serviceName}-functions-module'
   params: {
     name: name
@@ -40,5 +40,5 @@ module processor '../core/host/functions-flexconsumption.bicep' = {
   }
 }
 
-output SERVICE_PROCESSOR_NAME string = processor.outputs.name
-output SERVICE_API_IDENTITY_PRINCIPAL_ID string = processor.outputs.identityPrincipalId
+output SERVICE_PROXY_NAME string = proxy.outputs.name
+output SERVICE_API_IDENTITY_PRINCIPAL_ID string = proxy.outputs.identityPrincipalId
