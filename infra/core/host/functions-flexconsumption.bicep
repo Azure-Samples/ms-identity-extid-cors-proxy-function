@@ -21,6 +21,9 @@ param runtimeName string
 param runtimeVersion string
 param kind string = 'functionapp,linux'
 
+// Site Properties
+param corsAllowedOrigins array = []
+
 // Microsoft.Web/sites/config
 param appSettings object = {}
 param instanceMemoryMB int = 2048
@@ -61,6 +64,12 @@ resource functions 'Microsoft.Web/sites@2023-12-01' = {
       runtime: {
         name: runtimeName
         version: runtimeVersion
+      }
+      
+    }
+    siteConfig: {
+      cors: {
+        allowedOrigins: corsAllowedOrigins
       }
     }
     virtualNetworkSubnetId: virtualNetworkSubnetId

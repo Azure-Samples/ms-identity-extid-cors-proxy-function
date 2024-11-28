@@ -13,7 +13,7 @@ param instanceMemoryMB int = 2048
 param maximumInstanceCount int = 100
 param identityId string = ''
 param identityClientId string = ''
-
+param corsAllowedOrigins array = []
 var applicationInsightsIdentity = 'ClientId=${identityClientId};Authorization=AAD'
 
 module proxy '../core/host/functions-flexconsumption.bicep' = {
@@ -29,6 +29,7 @@ module proxy '../core/host/functions-flexconsumption.bicep' = {
         AzureWebJobsStorage__clientId : identityClientId
         APPLICATIONINSIGHTS_AUTHENTICATION_STRING: applicationInsightsIdentity
       })
+    corsAllowedOrigins: corsAllowedOrigins
     applicationInsightsName: applicationInsightsName
     appServicePlanId: appServicePlanId
     runtimeName: runtimeName

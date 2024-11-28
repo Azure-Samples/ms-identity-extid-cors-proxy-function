@@ -16,6 +16,9 @@ param environmentName string
 param location string
 
 param SpaURL string
+param tenantSubdomain string
+
+
 param proxyServiceName string = ''
 param proxyUserAssignedIdentityName string = ''
 param applicationInsightsName string = ''
@@ -64,10 +67,9 @@ module proxy './app/proxy.bicep' = {
     identityId: proxyUserAssignedIdentity.outputs.identityId
     identityClientId: proxyUserAssignedIdentity.outputs.identityClientId
     appSettings: {
-      cors: {
-        allowedOrigins: [SpaURL]
-      }
+      TENANT_SUBDOMAIN: tenantSubdomain
     }
+    corsAllowedOrigins: [SpaURL]
     virtualNetworkSubnetId: serviceVirtualNetwork.outputs.appSubnetID
   }
 }
