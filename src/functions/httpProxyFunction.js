@@ -17,28 +17,36 @@ async function MyProxyFunction(request, context) {
                 host: hostName,
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            timeout:0,
-            decompress:false,
-            maxContentLength: 100000,
-            maxBodyLength: 100000,
+            maxRedirects: 0,
+            decompress: false,
             responseType: 'text',
             validateStatus: function (status) {
-                return 1; // Never an error
+                return 1; // No HTTP Code trigger error-handling, we want to proxy all through
             }              
         };
 
         const requestData = await request.text();
-        options.body = requestData;
+        options.data = requestData;
 
-
-        context.log("HTTP Call");
-        //context.log("  BaseURL: " + options.baseURL);
+        context.log("Incoming Request");
+        context.log("  Path: " + request.url);
+        context.log("  Method: " + request.method);
+        context.log("  Headers: " + JSON.stringify(request.headers));
+        context.log("  Body: " + requestData);
+        
+        context.log("HTTP Request");
         context.log("  Path: " + options.url);
         context.log("  Method: " + options.method);
         context.log("  Headers: " + JSON.stringify(options.headers));
-        context.log("  Body: " + options.body);
+        context.log("  Body: " + options.data);
         
         const response = await axios.request(options);
+
+        context.log("HTTP Response");
+        context.log("  Status: " + response.status);
+        context.log("  Headers: " + JSON.stringify(options.headers));
+        context.log("  Body: " + response.data);
+        
         return {
             status: response.status,
             body: response.data,
@@ -55,7 +63,7 @@ async function MyProxyFunction(request, context) {
 };
 
 config = {
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['POST', 'OPTIONS'],
     route: "{*path}",
     authLevel: 'anonymous'
 }
