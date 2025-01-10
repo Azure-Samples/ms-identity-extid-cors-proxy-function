@@ -15,9 +15,11 @@ param environmentName string
 })
 param location string
 
-param SpaURL string
-param tenantSubdomain string
+@description('The origin domain to allow CORS requests from in the format of SCHEME://DOMAIN:PORT, e.g. http://localhost:3000')
+param corsAllowedOrigin string
 
+@description('The subdomain of the tenant that we will prox (This is the portion of the primary domain before the .onmicrosoft.com part, e.g. mytenant)')
+param tenantSubdomain string
 
 param proxyServiceName string = ''
 param proxyUserAssignedIdentityName string = ''
@@ -69,7 +71,7 @@ module proxy './app/proxy.bicep' = {
     appSettings: {
       TENANT_SUBDOMAIN: tenantSubdomain
     }
-    corsAllowedOrigins: [SpaURL]
+    corsAllowedOrigins: [corsAllowedOrigin]
     virtualNetworkSubnetId: serviceVirtualNetwork.outputs.appSubnetID
   }
 }

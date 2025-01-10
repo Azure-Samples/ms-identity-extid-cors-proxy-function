@@ -8,8 +8,8 @@
     "location": {
       "value": "${AZURE_LOCATION}"
     },
-    "SPAUrl": {
-      "value": "${SPA_URL}"
+    "corsAllowedOrigin": {
+      "value": "${CORS_ALLOWED_ORIGIN}"
     },
     "tenantSubdomain ": {
       "value": "${TENANT_SUBDOMAIN}"

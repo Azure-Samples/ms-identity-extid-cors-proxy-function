@@ -28,25 +28,8 @@ async function MyProxyFunction(request, context) {
         const requestData = await request.text();
         options.data = requestData;
 
-        context.log("Incoming Request");
-        context.log("  Path: " + request.url);
-        context.log("  Method: " + request.method);
-        context.log("  Headers: " + JSON.stringify(request.headers));
-        context.log("  Body: " + requestData);
-        
-        context.log("HTTP Request");
-        context.log("  Path: " + options.url);
-        context.log("  Method: " + options.method);
-        context.log("  Headers: " + JSON.stringify(options.headers));
-        context.log("  Body: " + options.data);
-        
         const response = await axios.request(options);
 
-        context.log("HTTP Response");
-        context.log("  Status: " + response.status);
-        context.log("  Headers: " + JSON.stringify(options.headers));
-        context.log("  Body: " + response.data);
-        
         return {
             status: response.status,
             body: response.data,
