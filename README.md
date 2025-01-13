@@ -1,57 +1,46 @@
-<!--
----
-name: Azure Functions JavaScript HTTP Trigger using Azure Developer CLI
-description: This repository contains an Azure Functions HTTP trigger quickstart written in JavaScript and deployed to Azure Functions Flex Consumption using the Azure Developer CLI (azd). The sample uses managed identity and a virtual network to make sure deployment is secure by default.
-page_type: sample
-languages:
-- azdeveloper
-- bicep
-- nodejs
-- javascript
-products:
-- azure
-- azure-functions
-- entra-id
-urlFragment: functions-quickstart-javascript-azd
----
--->
-
-# Azure Functions JavaScript HTTP Trigger using Azure Developer CLI
+# Azure Functions based CORS Proxy for Native Authentication APIs  using Azure Developer CLI
 
 This repository contains an Azure Functions HTTP trigger reference sample written in JavaScript and deployed to Azure using Azure Developer CLI (`azd`). The sample uses managed identity and a virtual network to make sure deployment is secure by default.
-
-This source code supports the article [Quickstart: Create and deploy functions to Azure Functions using the Azure Developer CLI](https://learn.microsoft.com/azure/azure-functions/create-first-function-azure-developer-cli?pivots=programming-language-javascript).
 
 ## Prerequisites
 
 + [Azure Developer CLI (`azd`)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd)
+
+## Deployment
+
+1. Run the following command to initialize the project.
+
+```bash
+azd init --template https://github.com/jamesc/ms-identity-ciam-cors-proxy
+```
+
+This command will clone the code to your current folder and prompt you for the following information:
+
+- `Environment Name`: This will be used as a prefix for the resource group that will be created to hold all Azure resources. This name should be unique within your Azure subscription.
+
+2. Run the following command to build a deployable copy of your application, provision the template's infrastructure to Azure and also deploy the application code to those newly provisioned resources.
+
+```bash
+azd up
+```
+
+This command will prompt you for the following information:
+- `Azure Location`: The Azure location where your resources will be deployed.
+- `Azure Subscription`: The Azure Subscription where your resources will be deployed.
+- `corsAllowedOrigin` parameter: The origin domain to allow CORS requests from in the format of `SCHEME://DOMAIN:PORT`, e.g. `http://localhost:3000`.
+- `tenantSubdomain` parameter: The subdomain of the External ID tenant that we will proxy (This is the portion of the primary domain before the .onmicrosoft.com part, e.g. mytenant).
+
+> NOTE: This may take a while to complete as it executes three commands: `azd package` (builds a deployable copy of your application), `azd provision` (provisions Azure resources), and `azd deploy` (deploys application code). You will see a progress indicator as it packages, provisions and deploys your application.
+
+Checkout the [Azure Dev CLI documentation for more instructions on using the CLI](https://docs.microsoft.com/en-us/azure/developer/azure-developer-cli/get-started).
+
+## Developer Instructions
 + To use Visual Studio Code to run and debug locally:
   + [Node.js 20](https://www.nodejs.org/) 
   + [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local?pivots=programming-language-javascript#install-the-azure-functions-core-tools)
   + [Visual Studio Code](https://code.visualstudio.com/)
   + [Azure Functions extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions)
-  + An HTTP test tool that keeps your data secure. This article uses the `curl` tool. For more information, see [HTTP test tools](https://learn.microsoft.com/azure/azure-functions/functions-develop-local#http-test-tools).
-
-## Initialize the local project
-
-You can initialize a project from this `azd` template in one of these ways:
-
-+ Use this `azd init` command from an empty local (root) folder:
-
-    ```shell
-    azd init --template functions-quickstart-javascript-azd
-    ```
-
-    Supply an environment name, such as `flexquickstart` when prompted. In `azd`, the environment is used to maintain a unique deployment context for your app.
-
-+ Clone the GitHub template repository locally using the `git clone` command:
-
-    ```shell
-    git clone https://github.com/Azure-Samples/functions-quickstart-javascript-azd.git
-    cd functions-quickstart-javascript-azd
-    ```
-
-    You can also clone the repository from your own fork in GitHub.
+  + An HTTP test tool that keeps your data secure - see [HTTP test tools](https://learn.microsoft.com/azure/azure-functions/functions-develop-local#http-test-tools).
 
 ## Prepare your local environment
 
@@ -61,8 +50,13 @@ Add a file named `local.settings.json` in the root of your project with the foll
 {
     "IsEncrypted": false,
     "Values": {
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "FUNCTIONS_WORKER_RUNTIME": "node"
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+        "FUNCTIONS_WORKER_RUNTIME": "node",
+        "TENANT_SUBDOMAIN": "<INSERT YOUR TENANT SUBDOMAIN HERE>"
+    },
+    "Host": {
+        "LocalHttpPort": 7071,
+        "CORS": "<INSERT ALLOWED CORS ORIGIN HERE>"
     }
 }
 ```
@@ -76,80 +70,9 @@ Add a file named `local.settings.json` in the root of your project with the foll
     func start
     ```
 
-1. From your HTTP test tool in a new terminal (or from your browser), call the HTTP GET endpoint: <http://localhost:7071/api/httpget>
-
-1. Test the HTTP POST trigger with a payload using your favorite secure HTTP test tool. This example uses the `curl` tool with payload data from the [`testdata.json`](./src/functions/testdata.json) project file:
-
-    ```shell
-    curl -i http://localhost:7071/api/httppost -H "Content-Type: text/json" -d "@src/functions/testdata.json"
-    ```
+1. Test the HTTP POST trigger with a payload using your favorite secure HTTP test tool. The proxy will be available at `http://localhost:7071/api`.
 
 1. When you're done, press Ctrl+C in the terminal window to stop the `func.exe` host process.
-
-## Run your app using Visual Studio Code
-
-1. Open the root folder in a new terminal.
-1. Run the `code .` code command to open the project in Visual Studio Code.
-1. Press **Run/Debug (F5)** to run in the debugger. Select **Debug anyway** if prompted about local emulator not running.
-1. Send GET and POST requests to the `httpget` and `httppost` endpoints respectively using your HTTP test tool (or browser for `httpget`). If you have the [RestClient](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) extension installed, you can execute requests directly from the [`test.http`](./src/functions/test.http) project file.
-
-## Source Code
-
-The source code for the GET and POST functions is in the [`httpGetFunction.js`](./src/functions/httpGetFunction.js) and [`httpPostBodyFunction.js`](./src/functions/httpPostBodyFunction.js) code files, respectively. Azure Functions requires the use of the `@azure/functions` library.
-
-This code shows an HTTP GET triggered function:
-
-```javascript
-const { app } = require('@azure/functions');
-
-app.http('httpget', {
-    methods: ['GET'],
-    authLevel: 'function',
-    handler: async (request, context) => {
-        context.log(`Http function processed request for url "${request.url}"`);
-
-        const name = request.query.get('name') || await request.text() || 'world';
-
-        return { body: `Hello, ${name}!` };
-    }
-});
-```
-
-This code shows an HTTP POST triggered function that expects `person` object with `name` and `age` values in the request body.
-
-```javascript
-const { app } = require('@azure/functions');
-
-app.http('httppost', {
-    methods: ['POST'],
-    authLevel: 'function',
-    handler: async (request, context) => {
-        context.log(`Http function processed request for url "${request.url}"`);
-
-        try {
-            const person = await request.json();
-            const { name, age } = person;
-
-            if (!name || !age) {
-                return {
-                    status: 400,
-                    body: 'Please provide both name and age in the request body.'
-                };
-            }
-
-            return {
-                status: 200,
-                body: `Hello, ${name}! You are ${age} years old.`
-            };
-        } catch (error) {
-            return {
-                status: 400,
-                body: 'Invalid request body. Please provide a valid JSON object with name and age.'
-            };
-        }
-    }
-});
-```
 
 ## Deploy to Azure
 
@@ -166,8 +89,8 @@ You're prompted to supply these required deployment parameters:
 | _Environment name_ | An environment that's used to maintain a unique deployment context for your app. You won't be prompted if you created the local project using `azd init`.|
 | _Azure subscription_ | Subscription in which your resources are created.|
 | _Azure location_ | Azure region in which to create the resource group that contains the new Azure resources. Only regions that currently support the Flex Consumption plan are shown.|
-
-After publish completes successfully, `azd` provides you with the URL endpoints of your new functions, but without the function key values required to access the endpoints. To learn how to obtain these same endpoints along with the required function keys, see [Invoke the function on Azure](https://learn.microsoft.com/azure/azure-functions/create-first-function-azure-developer-cli?pivots=programming-language-javascript#invoke-the-function-on-azure) in the companion article [Quickstart: Create and deploy functions to Azure Functions using the Azure Developer CLI](https://learn.microsoft.com/azure/azure-functions/create-first-function-azure-developer-cli?pivots=programming-language-javascript).
+| _corsAllowedOrigin_ | The origin domain to allow CORS requests from in the format of `SCHEME://DOMAIN:PORT`, e.g. `http://localhost:3000`.|
+| _tenantSubdomain_ | The subdomain of the External ID tenant that we will proxy (This is the portion of the primary domain before the .onmicrosoft.com part, e.g. mytenant).|
 
 ## Redeploy your code
 

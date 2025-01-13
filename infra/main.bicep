@@ -18,7 +18,7 @@ param location string
 @description('The origin domain to allow CORS requests from in the format of SCHEME://DOMAIN:PORT, e.g. http://localhost:3000')
 param corsAllowedOrigin string
 
-@description('The subdomain of the tenant that we will prox (This is the portion of the primary domain before the .onmicrosoft.com part, e.g. mytenant)')
+@description('The subdomain of the External ID tenant that we will proxy (This is the portion of the primary domain before the .onmicrosoft.com part, e.g. mytenant)')
 param tenantSubdomain string
 
 param proxyServiceName string = ''
