@@ -62,4 +62,4 @@ if (tenantSubdomain) {
     }
 }
 
-app.http('authProxy', config);
+app.http('httpProxyFunction', config);

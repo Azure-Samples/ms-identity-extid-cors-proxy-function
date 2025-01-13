@@ -1,8 +1,18 @@
-@endpoint=https://func-proxy-yz2khj4r7pd6m.azurewebsites.net
-@origin= http://localhost:3000
-@client_id=8156270e-e65f-44e6-afb0-2f0291458a83
-@new_user=jacasey.000@gmail.com
-@existing_user=jamesc.000@gmail.com
+##
+## Test script for use with VS Code REST Client extension
+## 
+## Complete these variables with your own values
+##
+
+# The endpoint of the deployed function app e.g. https://func-proxy-XXXXXXXX.azurewebsites.net
+@endpoint=<ENDPOINT_URL>
+# The Web Application which will use the proxy (e.g. http://localhost:3000)
+@origin=<ORIGIN_URL>
+# The client ID of the application that will use the proxy
+@client_id=<CLIENT_ID>
+# Existing and new user email addresses for testing
+@new_user=<NEW_USERNAME>
+@existing_user=<EXISTING_USERNAME>
 
 POST {{endpoint}}/api/signup/v1.0/start HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
