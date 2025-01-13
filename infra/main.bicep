@@ -42,7 +42,7 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-// User assigned managed identity to be used by the Function App to reach storage and service bus
+// User assigned managed identity to be used by the Function App to reach storage
 module proxyUserAssignedIdentity './core/identity/userAssignedIdentity.bicep' = {
   name: 'proxyUserAssignedIdentity'
   scope: rg
