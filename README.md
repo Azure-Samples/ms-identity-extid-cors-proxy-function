@@ -32,7 +32,18 @@ This command will prompt you for the following information:
 
 > NOTE: This may take a while to complete as it executes three commands: `azd package` (builds a deployable copy of your application), `azd provision` (provisions Azure resources), and `azd deploy` (deploys application code). You will see a progress indicator as it packages, provisions and deploys your application.
 
-Checkout the [Azure Dev CLI documentation for more instructions on using the CLI](https://docs.microsoft.com/en-us/azure/developer/azure-developer-cli/get-started).
+Once it is deployed, you should see the Endpoint of the deployed proxy, e.g.
+
+``` bash
+Deploying services (azd deploy)
+
+  (✓) Done: Deploying service proxy
+  - Endpoint: https://func-proxy-eklrf2yt64zyg.azurewebsites.net/
+```
+
+You can then use this endpoint from your Single Page Application. The Native Authentication APIs with CORS headers enabled will be available at `<ENDPOINT>/api`.
+
+For more on how to deploy and update the running application, checkout the [Azure Dev CLI documentation for more instructions on using the CLI](https://docs.microsoft.com/en-us/azure/developer/azure-developer-cli/get-started).
 
 ## Developer Instructions
 + To use Visual Studio Code to run and debug locally:
