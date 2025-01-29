@@ -72,6 +72,8 @@ Add a file named `local.settings.json` in the root of your project with the foll
 }
 ```
 
+where the CORS Origin will be of the form `PROTOCOL://HOSTNAME:SCHEME`, e.g. `http://localhost:3000`.
+
 ## Run your app from the terminal
 
 1. Run these commands to start the Functions host locally:
