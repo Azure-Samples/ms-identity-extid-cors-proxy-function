@@ -47,7 +47,7 @@ For more on how to deploy and update the running application, checkout the [Azur
 
 ## Developer Instructions
 + To use Visual Studio Code to run and debug locally:
-  + [Node.js 20](https://www.nodejs.org/) 
+  + [Node.js 20](https://www.nodejs.org/)
   + [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local?pivots=programming-language-javascript#install-the-azure-functions-core-tools)
   + [Visual Studio Code](https://code.visualstudio.com/)
   + [Azure Functions extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions)
@@ -81,7 +81,7 @@ Add a file named `local.settings.json` in the root of your project with the foll
     func start
     ```
 
-1. Test the HTTP POST trigger with a payload using your favorite secure HTTP test tool. The proxy will be available at `http://localhost:7071/api`.
+1. Test the HTTP POST trigger with a payload using your favorite secure HTTP test tool. The proxy will be available at `http://localhost:7071/`.
 
 1. When you're done, press Ctrl+C in the terminal window to stop the `func.exe` host process.
 
@@ -105,10 +105,22 @@ You're prompted to supply these required deployment parameters:
 
 ## Redeploy your code
 
-You can run the `azd up` command as many times as you need to both provision your Azure resources and deploy code updates to your function app. 
+You can run the `azd up` command as many times as you need to both provision your Azure resources and deploy code updates to your function app.
 
 >[!NOTE]
 >Deployed code files are always overwritten by the latest deployment package.
+
+## Using the reverse proxy
+
+You can configure your single page application to use the `Service endpoint` as the URL prefix for your Native Authentication endpoints.  This will be of the form `https://func-proxy-XXXXXX.azurewebsites.net` where `XXXX` is replaced with a random string, for example:
+
+
+```shell
+Deploying services (azd deploy)
+
+  (✓) Done: Deploying service proxy
+  - Endpoint: https://func-proxy-n6urdpomcocly.azurewebsites.net/
+```
 
 ## Clean up resources
 
