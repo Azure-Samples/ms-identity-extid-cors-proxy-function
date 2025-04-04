@@ -22,20 +22,26 @@ async function MyProxyFunction(request, context) {
             responseType: 'text',
             validateStatus: function (status) {
                 return 1; // No HTTP Code trigger error-handling, we want to proxy all through
-            }              
+            }
         };
 
         const requestData = await request.text();
         options.data = requestData;
 
         const response = await axios.request(options);
-
+        const corsResponseHeaders = {}
+        if (request.method === 'OPTIONS') {
+            if (request.headers["access-control-request-headers"] && request.headers["access-control-request-headers"].length > 0) {
+                corsResponseHeaders["Access-Control-Allow-Headers"] =  request.headers["access-control-request-headers"];
+            }
+        }
         return {
             status: response.status,
             body: response.data,
             headers: {
-                ...response.headers
-            }
+                ...response.headers,
+                ...corsResponseHeaders
+                   }
         };
     } catch (error) {
         return {
