@@ -71,7 +71,7 @@ module proxy './app/proxy.bicep' = {
     appSettings: {
       TENANT_SUBDOMAIN: tenantSubdomain
     }
-    corsAllowedOrigins: [corsAllowedOrigin]
+    corsAllowedOrigins: ['https://portal.azure.com', corsAllowedOrigin] // Allow CORS from Azure portal for testing in portal
     virtualNetworkSubnetId: serviceVirtualNetwork.outputs.appSubnetID
   }
 }

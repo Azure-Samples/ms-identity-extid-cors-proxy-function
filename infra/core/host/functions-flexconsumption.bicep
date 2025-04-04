@@ -40,12 +40,14 @@ resource functions 'Microsoft.Web/sites@2023-12-01' = {
   kind: kind
   identity: {
     type: identityType
-    userAssignedIdentities: { 
+    userAssignedIdentities: {
       '${identityId}': {}
     }
   }
   properties: {
     serverFarmId: appServicePlanId
+    httpsOnly: true
+    clientAffinityEnabled: false
     functionAppConfig: {
       deployment: {
         storage: {
@@ -53,7 +55,7 @@ resource functions 'Microsoft.Web/sites@2023-12-01' = {
           value: '${stg.properties.primaryEndpoints.blob}deploymentpackage'
           authentication: {
             type: identityType == 'SystemAssigned' ? 'SystemAssignedIdentity' : 'UserAssignedIdentity'
-            userAssignedIdentityResourceId: identityType == 'UserAssigned' ? identityId : '' 
+            userAssignedIdentityResourceId: identityType == 'UserAssigned' ? identityId : ''
           }
         }
       }
@@ -65,12 +67,14 @@ resource functions 'Microsoft.Web/sites@2023-12-01' = {
         name: runtimeName
         version: runtimeVersion
       }
-      
+
     }
     siteConfig: {
       cors: {
         allowedOrigins: corsAllowedOrigins
       }
+      minTlsVersion: '1.2'
+      http20Enabled: true
     }
     virtualNetworkSubnetId: virtualNetworkSubnetId
   }

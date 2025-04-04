@@ -8,7 +8,7 @@ param publicNetworkAccess string = 'Enabled'
 param containers array = []
 param kind string = 'StorageV2'
 param minimumTlsVersion string = 'TLS1_2'
-param sku object = { name: 'Standard_LRS' }
+param sku object = { name: 'Standard_ZRS' }
 
 resource storage 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: name
@@ -23,12 +23,22 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     allowSharedKeyAccess: false
     networkAcls: {
       bypass: 'AzureServices'
-      defaultAction: 'Allow'
+      defaultAction: 'Deny'
     }
   }
 
   resource blobServices 'blobServices' = if (!empty(containers)) {
     name: 'default'
+    properties: {
+      deleteRetentionPolicy: {
+        days: 7
+        enabled: true
+      }
+      containerDeleteRetentionPolicy: {
+        enabled: true
+        days: 7
+      }
+    }
     resource container 'containers' = [for container in containers: {
       name: container.name
       properties: {
