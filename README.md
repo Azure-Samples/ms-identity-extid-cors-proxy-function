@@ -41,7 +41,7 @@ Deploying services (azd deploy)
   - Endpoint: https://func-proxy-eklrf2yt64zyg.azurewebsites.net/
 ```
 
-You can then use this endpoint from your Single Page Application. The Native Authentication APIs with CORS headers enabled will be available at `<ENDPOINT>/api`.
+You can then use this endpoint from your Single Page Application. The Native Authentication APIs with CORS headers enabled will be available at `<ENDPOINT>`.
 
 For more on how to deploy and update the running application, checkout the [Azure Dev CLI documentation for more instructions on using the CLI](https://docs.microsoft.com/en-us/azure/developer/azure-developer-cli/get-started).
 
