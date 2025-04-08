@@ -7,6 +7,9 @@ on:
   pull_request:
     branches:
       - main
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   build:
@@ -22,8 +25,10 @@ jobs:
   psrule:
     runs-on: ubuntu-latest
     permissions:
-      security-events: write
       contents: read
+      pull-requests: write
+      security-events: write
+      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,8 +47,7 @@ jobs:
           PSRULE_CONFIGURATION_AZURE_BICEP_FILE_EXPANSION: 'true'
           PSRULE_CONFIGURATION_AZURE_BICEP_FILE_EXPANSION_TIMEOUT: '30'
 
-      # TODO: Reenable once moved to Azure-Samples
-      # - name: Upload results to security tab
-      #   uses: github/codeql-action/upload-sarif@v3
-      #   with:
-      #     sarif_file: reports/ps-rule-results.sarif
+      - name: Upload results to security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: reports/ps-rule-results.sarif
