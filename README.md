@@ -1,6 +1,6 @@
 # Azure Functions based CORS Proxy for Native Authentication APIs  using Azure Developer CLI
 
-This repository contains an Azure Functions HTTP trigger reference sample written in JavaScript and deployed to Azure using Azure Developer CLI (`azd`). The sample uses managed identity and a virtual network to make sure deployment is secure by default.
+This repository contains an Azure Functions HTTP trigger reference sample written in JavaScript and deployed to Azure using Azure Developer CLI (`azd`). The proxy supports both Native Authentication V1 and V2. The sample uses managed identity and a virtual network to make sure deployment is secure by default.
 
 ## Prerequisites
 
@@ -83,7 +83,7 @@ where the CORS Origin will be of the form `PROTOCOL://HOSTNAME:SCHEME`, e.g. `ht
     func start
     ```
 
-1. Test the HTTP POST trigger with a payload using your favorite secure HTTP test tool. The proxy will be available at `http://localhost:7071/`.
+1. Test the HTTP `POST` or `PUT` trigger with a payload using your favorite secure HTTP test tool. The proxy will be available at `http://localhost:7071/`.
 
 1. When you're done, press Ctrl+C in the terminal window to stop the `func.exe` host process.
 
@@ -123,6 +123,11 @@ Deploying services (azd deploy)
   (✓) Done: Deploying service proxy
   - Endpoint: https://func-proxy-n6urdpomcocly.azurewebsites.net/
 ```
+
+V2 compatibility includes JSON content types and the `PUT` method used when
+resetting a password. Azure Functions platform CORS handles browser preflight
+and response headers. The proxy removes the browser `Origin` header only when
+forwarding token redemption requests to `/oauth2/v2.0/token`.
 
 ## Clean up resources
 

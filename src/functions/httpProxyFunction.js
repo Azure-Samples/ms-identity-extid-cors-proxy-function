@@ -8,14 +8,22 @@ async function MyProxyFunction(request, context) {
         const hostName = `${tenantSubdomain}.ciamlogin.com`;
         const baseURL = `https://${hostName}/${tenantSubdomain}.onmicrosoft.com`;
         const incomingPath = request.params.path || '';
+        const forwardedHeaders = Object.fromEntries(request.headers.entries());
+
+        const normalizedPath = `/${incomingPath}`
+            .replace(/\/+/g, '/')
+            .replace(/\/$/, '')
+            .toLowerCase();
+        if (normalizedPath.endsWith('/oauth2/v2.0/token')) {
+            delete forwardedHeaders.origin;
+        }
 
         const options = {
             url: `${baseURL}/${incomingPath}`,
             method: request.method,
             headers: {
-                ...request.headers,
-                host: hostName,
-                'Content-Type': 'application/x-www-form-urlencoded'
+                ...forwardedHeaders,
+                host: hostName
             },
             maxRedirects: 0,
             decompress: false,
@@ -29,18 +37,11 @@ async function MyProxyFunction(request, context) {
         options.data = requestData;
 
         const response = await axios.request(options);
-        const corsResponseHeaders = {}
-        if (request.method === 'OPTIONS') {
-            if (request.headers["access-control-request-headers"] && request.headers["access-control-request-headers"].length > 0) {
-                corsResponseHeaders["Access-Control-Allow-Headers"] =  request.headers["access-control-request-headers"];
-            }
-        }
         return {
             status: response.status,
             body: response.data,
             headers: {
-                ...response.headers,
-                ...corsResponseHeaders
+                ...response.headers
                    }
         };
     } catch (error) {
@@ -52,7 +53,7 @@ async function MyProxyFunction(request, context) {
 };
 
 config = {
-    methods: ['POST', 'OPTIONS'],
+    methods: ['POST', 'PUT', 'OPTIONS'],
     route: "{*path}",
     authLevel: 'anonymous'
 }
