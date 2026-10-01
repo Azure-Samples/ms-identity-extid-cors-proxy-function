@@ -125,9 +125,10 @@ Deploying services (azd deploy)
 ```
 
 V2 compatibility includes JSON content types and the `PUT` method used when
-resetting a password. Azure Functions platform CORS handles browser preflight
-and response headers. The proxy removes the browser `Origin` header only when
-forwarding token redemption requests to `/oauth2/v2.0/token`.
+resetting a password. The proxy forwards the request path, query string, and
+browser `Origin` header to the tenant subdomain. Azure Functions platform CORS
+handles browser preflight, and the proxy reflects requested headers on OPTIONS
+responses.
 
 ## Clean up resources
 

@@ -10,16 +10,8 @@ async function MyProxyFunction(request, context) {
         const incomingPath = request.params.path || '';
         const forwardedHeaders = Object.fromEntries(request.headers.entries());
 
-        const normalizedPath = `/${incomingPath}`
-            .replace(/\/+/g, '/')
-            .replace(/\/$/, '')
-            .toLowerCase();
-        if (normalizedPath.endsWith('/oauth2/v2.0/token')) {
-            delete forwardedHeaders.origin;
-        }
-
         const options = {
-            url: `${baseURL}/${incomingPath}`,
+            url: `${baseURL}/${incomingPath}${new URL(request.url).search}`,
             method: request.method,
             headers: {
                 ...forwardedHeaders,
@@ -37,11 +29,19 @@ async function MyProxyFunction(request, context) {
         options.data = requestData;
 
         const response = await axios.request(options);
+        const corsResponseHeaders = {};
+        if (request.method === 'OPTIONS') {
+            const requestedHeaders = request.headers.get('access-control-request-headers');
+            if (requestedHeaders) {
+                corsResponseHeaders['Access-Control-Allow-Headers'] = requestedHeaders;
+            }
+        }
         return {
             status: response.status,
             body: response.data,
             headers: {
-                ...response.headers
+                ...response.headers,
+                ...corsResponseHeaders
                    }
         };
     } catch (error) {
