@@ -124,11 +124,6 @@ Deploying services (azd deploy)
   - Endpoint: https://func-proxy-n6urdpomcocly.azurewebsites.net/
 ```
 
-V2 compatibility includes JSON content types and the `PUT` method used when
-resetting a password. The proxy forwards the request path and browser `Origin`
-header to the tenant subdomain. Azure Functions platform CORS handles browser
-preflight, and the proxy reflects requested headers on OPTIONS responses.
-
 ## Clean up resources
 
 When you're done working with your function app and related resources, you can use this command to delete the function app and its related resources from Azure and avoid incurring any further costs:
