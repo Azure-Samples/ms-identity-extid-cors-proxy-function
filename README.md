@@ -126,8 +126,8 @@ Deploying services (azd deploy)
 
 V2 compatibility includes JSON content types and the `PUT` method used when
 resetting a password. The proxy forwards the request path and browser `Origin`
-header to the tenant subdomain. Incoming content types are preserved; requests
-without one default to `application/x-www-form-urlencoded` for V1 compatibility.
+header to the tenant subdomain. Incoming content types are preserved, including
+`application/x-www-form-urlencoded` for V1 requests and JSON for V2 requests.
 Azure Functions platform CORS handles browser preflight, and the proxy reflects
 requested headers on OPTIONS responses.
 

@@ -9,9 +9,6 @@ async function MyProxyFunction(request, context) {
         const baseURL = `https://${hostName}/${tenantSubdomain}.onmicrosoft.com`;
         const incomingPath = request.params.path || '';
         const forwardedHeaders = Object.fromEntries(request.headers.entries());
-        if (!forwardedHeaders['content-type']) {
-            forwardedHeaders['content-type'] = 'application/x-www-form-urlencoded';
-        }
 
         const options = {
             url: `${baseURL}/${incomingPath}`,
