@@ -8,14 +8,14 @@ async function MyProxyFunction(request, context) {
         const hostName = `${tenantSubdomain}.ciamlogin.com`;
         const baseURL = `https://${hostName}/${tenantSubdomain}.onmicrosoft.com`;
         const incomingPath = request.params.path || '';
-        const forwardedHeaders = Object.fromEntries(request.headers.entries());
 
         const options = {
             url: `${baseURL}/${incomingPath}`,
             method: request.method,
             headers: {
-                ...forwardedHeaders,
-                host: hostName
+                ...request.headers,
+                host: hostName,
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
             maxRedirects: 0,
             decompress: false,
@@ -29,11 +29,10 @@ async function MyProxyFunction(request, context) {
         options.data = requestData;
 
         const response = await axios.request(options);
-        const corsResponseHeaders = {};
+        const corsResponseHeaders = {}
         if (request.method === 'OPTIONS') {
-            const requestedHeaders = request.headers.get('access-control-request-headers');
-            if (requestedHeaders) {
-                corsResponseHeaders['Access-Control-Allow-Headers'] = requestedHeaders;
+            if (request.headers["access-control-request-headers"] && request.headers["access-control-request-headers"].length > 0) {
+                corsResponseHeaders["Access-Control-Allow-Headers"] =  request.headers["access-control-request-headers"];
             }
         }
         return {
@@ -53,7 +52,7 @@ async function MyProxyFunction(request, context) {
 };
 
 config = {
-    methods: ['POST', 'PUT', 'OPTIONS'],
+    methods: ['POST', 'OPTIONS'],
     route: "{*path}",
     authLevel: 'anonymous'
 }
