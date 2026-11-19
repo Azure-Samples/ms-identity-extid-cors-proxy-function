@@ -2,16 +2,20 @@ const { app } = require("@azure/functions");
 const  axios = require('axios');
 
 const tenantSubdomain = process.env.TENANT_SUBDOMAIN || '';
+const tenantPathPattern = /^\/(?:[^/]+\.onmicrosoft\.com|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})(?:\/|$)/i;
 
 async function MyProxyFunction(request, context) {
     try {
         const hostName = `${tenantSubdomain}.ciamlogin.com`;
-        const baseURL = `https://${hostName}/${tenantSubdomain}.onmicrosoft.com`;
-        const incomingPath = request.params.path || '';
+        const incomingUrl = new URL(request.url);
+        const incomingPath = incomingUrl.pathname;
+        const forwardedPath = tenantPathPattern.test(incomingPath)
+            ? incomingPath
+            : `/${tenantSubdomain}.onmicrosoft.com${incomingPath}`;
         const forwardedHeaders = Object.fromEntries(request.headers.entries());
 
         const options = {
-            url: `${baseURL}/${incomingPath}`,
+            url: `https://${hostName}${forwardedPath}${incomingUrl.search}`,
             method: request.method,
             headers: {
                 ...forwardedHeaders,
